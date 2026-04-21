@@ -224,11 +224,18 @@ export default function Collections() {
                      </div>
                   </div>
                   <div className="flex gap-2">
-                     <div className="flex-1 border border-slate-700 bg-slate-950 rounded px-3 py-1.5 flex items-center justify-between group-hover:border-slate-600 transition-colors" onClick={(e) => e.stopPropagation()}>
+                     <div 
+                       className="flex-1 border border-slate-700 bg-slate-950 rounded px-3 py-1.5 flex items-center justify-between group-hover:border-slate-600 transition-colors cursor-pointer hover:bg-slate-900" 
+                       onClick={(e) => {
+                         e.stopPropagation();
+                         window.open(item.affiliate_link || "https://shopee.co.id", "_blank", "noopener,noreferrer");
+                       }}
+                       title="Buka halaman Shopee asli"
+                     >
                         <span className="text-xs text-slate-400 truncate w-full pr-2 font-mono">
                           {item.affiliate_link || "https://shp.ee/..."}
                         </span>
-                        <ExternalLink className="w-3.5 h-3.5 text-slate-500 flex-shrink-0 cursor-pointer hover:text-white" />
+                        <ExternalLink className="w-3.5 h-3.5 text-slate-400 flex-shrink-0 cursor-pointer group-hover:text-white" />
                      </div>
                      <Button 
                        variant="destructive" 
