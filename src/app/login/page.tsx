@@ -19,6 +19,8 @@ export default function LoginPage() {
 
     // Simulate Supabase/Auth network delay
     setTimeout(() => {
+      // Set fake cookie to bypass middleware protector
+      document.cookie = "shopfind_session=active; path=/; max-age=86400";
       setIsLoading(false);
       router.push("/");
     }, 1500);

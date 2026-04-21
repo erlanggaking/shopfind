@@ -1,4 +1,7 @@
+"use client";
+
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Home, Search, Video, Archive, PieChart, LogOut, Settings } from 'lucide-react';
 
 const menuItems = [
@@ -10,6 +13,14 @@ const menuItems = [
 ];
 
 export function Sidebar() {
+  const router = useRouter();
+
+  const handleLogout = () => {
+     // Hancurkan cookie
+     document.cookie = "shopfind_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+     router.push("/login");
+  };
+
   return (
     <aside className="w-64 h-screen bg-slate-950 text-slate-300 flex flex-col border-r border-slate-800">
       <div className="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-900/50">
@@ -37,10 +48,10 @@ export function Sidebar() {
           <Settings className="w-5 h-5 text-slate-500" />
           Settings
         </Link>
-        <Link href="/login" className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors">
+        <button onClick={handleLogout} className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors">
           <LogOut className="w-5 h-5" />
           Logout
-        </Link>
+        </button>
       </div>
     </aside>
   );
