@@ -14,6 +14,7 @@ import { useStreamerStore, type Streamer } from "@/store/useStreamerStore";
 export default function LivestreamManager() {
   const streamers = useStreamerStore((state) => state.streamers);
   const [selectedStreamer, setSelectedStreamer] = useState<Streamer | null>(null);
+  const [selectedStudio, setSelectedStudio] = useState<string | null>(null);
   const [injectedProducts, setInjectedProducts] = useState<any[]>([]);
   
   // Interactive Drawer States
@@ -100,201 +101,245 @@ export default function LivestreamManager() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-        {streamers.map((streamer) => (
-          <Drawer key={streamer.id}>
-            <DrawerTrigger asChild>
+      {!selectedStudio ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from(new Set(streamers.map(s => s.studio))).map((studioName) => {
+            const studioStreamers = streamers.filter(s => s.studio === studioName);
+            const liveCount = studioStreamers.filter(s => s.isLive).length;
+            
+            return (
               <Card 
-                className={`bg-slate-900 border-slate-800 cursor-pointer transition-all hover:bg-slate-800/80 ${streamer.isLive ? 'border-orange-500/30' : 'opacity-80'}`}
-                onClick={() => setSelectedStreamer(streamer)}
+                key={studioName}
+                className="bg-slate-900 border-slate-800 cursor-pointer transition-all hover:bg-slate-800/80 hover:border-orange-500/50 group"
+                onClick={() => setSelectedStudio(studioName)}
               >
-                <CardContent className="p-4 flex flex-col items-center text-center relative">
-                  {streamer.isLive && (
-                    <div className="absolute top-3 right-3 flex h-3 w-3">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                    </div>
-                  )}
-                  <Avatar className="w-16 h-16 border-2 border-slate-800 mb-3">
-                    <AvatarImage src={streamer.avatar} />
-                    <AvatarFallback>{streamer.name.substring(0, 2)}</AvatarFallback>
-                  </Avatar>
-                  <h3 className="text-sm font-medium text-slate-200 line-clamp-1 h-5">{streamer.name}</h3>
-                  
-                  {streamer.isLive ? (
-                    <div className="mt-4 w-full flex justify-between text-xs border-t border-slate-800 pt-3">
-                       <div className="flex items-center text-emerald-400">
-                         <Users className="w-3 h-3 mr-1" />
-                         {streamer.ccu.toLocaleString()}
-                       </div>
-                       <div className="flex items-center text-slate-400">
-                         <Clock className="w-3 h-3 mr-1" />
-                         {streamer.duration.split(":")[0]}h {streamer.duration.split(":")[1]}m
-                       </div>
-                    </div>
-                  ) : (
-                    <div className="mt-4 w-full text-xs text-slate-500 border-t border-slate-800 pt-3 flex justify-center items-center">
-                       <RadioTower className="w-3 h-3 mr-1" /> Offline
-                    </div>
-                  )}
-
-                  {streamer.isLive && (
-                    <div className="absolute -left-2 top-8 bg-slate-950 p-1 rounded-r border border-l-0 border-slate-800">
-                       <Pin className="w-3 h-3 text-orange-500" />
-                    </div>
-                  )}
+                <CardContent className="p-6 flex flex-col items-center text-center relative">
+                  <div className="w-20 h-20 bg-slate-950 rounded-full flex items-center justify-center border-4 border-slate-800 mb-4 group-hover:border-orange-500/30 transition-colors shadow-lg">
+                    <RadioTower className="w-8 h-8 text-orange-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-100 mb-2">{studioName}</h3>
+                  <div className="flex items-center gap-4 text-sm mt-2">
+                    <Badge variant="outline" className="bg-slate-950 border-slate-800 text-slate-300">
+                      <Users className="w-3 h-3 mr-1" /> {studioStreamers.length} Hosts
+                    </Badge>
+                    <Badge variant="outline" className={`${liveCount > 0 ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-slate-950 border-slate-800 text-slate-500'}`}>
+                      <span className={`w-2 h-2 rounded-full mr-1.5 ${liveCount > 0 ? 'bg-red-500 animate-pulse' : 'bg-slate-600'}`}></span>
+                      {liveCount} Live
+                    </Badge>
+                  </div>
                 </CardContent>
               </Card>
-            </DrawerTrigger>
-            
-            <DrawerContent className="bg-slate-950 border-slate-800 text-slate-200">
-              <div className="mx-auto w-full max-w-4xl p-6">
-                <DrawerHeader className="px-0 pt-0 pb-4 border-b border-slate-800 flex flex-col md:flex-row md:items-start md:justify-between">
-                  <div className="flex items-center gap-4">
-                    <Avatar className="w-16 h-16 border border-slate-700">
-                      <AvatarImage src={selectedStreamer?.avatar} />
-                    </Avatar>
-                    <div className="text-left">
-                      <DrawerTitle className="text-2xl text-white">{selectedStreamer?.name}</DrawerTitle>
-                      <DrawerDescription className="flex items-center gap-2 mt-1">
-                        {selectedStreamer?.isLive ? (
-                          <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20">
-                            🔴 LIVE NOW
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="bg-slate-800 text-slate-400 border-slate-700">
-                            ⚫ OFFLINE
-                          </Badge>
-                        )}
-                        <span>Master ID: {selectedStreamer?.id}92837482</span>
-                      </DrawerDescription>
-                    </div>
-                  </div>
-                  <div className="mt-4 md:mt-0 flex gap-3">
-                    {selectedStreamer?.isLive ? (
-                      <Button variant="destructive" className="bg-red-600 hover:bg-red-700 shadow-lg shadow-red-500/20">
-                        <Square className="w-4 h-4 mr-2" /> End Session
-                      </Button>
-                    ) : (
-                      <Button className="bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20">
-                        <Play className="w-4 h-4 mr-2" /> Start Live
-                      </Button>
-                    )}
-                  </div>
-                </DrawerHeader>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm" onClick={() => setSelectedStudio(null)} className="border-slate-800 text-slate-300 hover:bg-slate-800">
+                &larr; Back to Studios
+              </Button>
+              <h3 className="text-xl font-bold text-slate-200 border-l border-slate-800 pl-4">{selectedStudio}</h3>
+            </div>
+          </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                  {/* Pinned Items / Bag Section */}
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-lg flex items-center">
-                      <ShoppingBagIcon className="w-5 h-5 mr-2 text-orange-400" />
-                      Keranjang Streamer
-                    </h4>
-                    <Card className="bg-slate-900 border-slate-800">
-                      <CardContent className="p-0">
-                         {selectedStreamer?.isLive ? (
-                           <div className="divide-y divide-slate-800 max-h-[300px] overflow-y-auto">
-                             {injectedProducts.length > 0 ? injectedProducts.map((item, index) => {
-                               const isPinned = pinnedItemId === item.id;
-                               return (
-                               <div key={item.id} className={`p-3 flex items-center gap-3 transition-colors ${isPinned ? 'bg-orange-500/5' : 'hover:bg-slate-800/30'}`}>
-                                 <div className="w-12 h-12 bg-slate-800 rounded flex-shrink-0 relative overflow-hidden">
-                                   <img src={item.image_url} alt="" className="w-full h-full object-cover" />
-                                   <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center font-bold text-white text-xs">P{index + 1}</div>
-                                 </div>
-                                 <div className="flex-1 min-w-0 pr-2">
-                                   <p className={`text-sm font-medium truncate ${isPinned ? 'text-orange-400' : 'text-slate-200'}`} title={item.product_name}>
-                                     {item.product_name}
-                                   </p>
-                                   <p className="text-xs text-emerald-400">Rp {item.price_discount?.toLocaleString('id-ID')}</p>
-                                 </div>
-                                 <div className="flex items-center gap-1">
-                                    <Button 
-                                      size="sm" 
-                                      variant="outline" 
-                                      onClick={() => handleManualPin(item.id)}
-                                      className={`text-xs h-7 px-2 border-slate-700 transition-colors ${isPinned ? 'border-orange-500 text-orange-400 bg-orange-500/10' : 'text-slate-400 hover:text-white'}`}
-                                    >
-                                      {isPinned ? 'Pinned' : 'Pin'}
-                                    </Button>
-                                    <Button 
-                                      size="icon" 
-                                      variant="ghost" 
-                                      className="h-7 w-7 text-slate-500 hover:text-red-400 hover:bg-slate-800 disabled:opacity-50"
-                                      onClick={(e) => handleRemoveFromCart(item.id, e)}
-                                      title="Hapus dari Keranjang Streamer"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                 </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            {streamers.filter(s => s.studio === selectedStudio).map((streamer) => (
+              <Drawer key={streamer.id}>
+                <DrawerTrigger asChild>
+                  <Card 
+                    className={`bg-slate-900 border-slate-800 cursor-pointer transition-all hover:bg-slate-800/80 ${streamer.isLive ? 'border-orange-500/30' : 'opacity-80'}`}
+                    onClick={() => setSelectedStreamer(streamer)}
+                  >
+                    <CardContent className="p-4 flex flex-col items-center text-center relative">
+                      {streamer.isLive && (
+                        <div className="absolute top-3 right-3 flex h-3 w-3">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                        </div>
+                      )}
+                      <Avatar className="w-16 h-16 border-2 border-slate-800 mb-3">
+                        <AvatarImage src={streamer.avatar} />
+                        <AvatarFallback>{streamer.name.substring(0, 2)}</AvatarFallback>
+                      </Avatar>
+                      <h3 className="text-sm font-medium text-slate-200 line-clamp-1 h-5">{streamer.name}</h3>
+                      
+                      {streamer.isLive ? (
+                        <div className="mt-4 w-full flex justify-between text-xs border-t border-slate-800 pt-3">
+                           <div className="flex items-center text-emerald-400">
+                             <Users className="w-3 h-3 mr-1" />
+                             {streamer.ccu.toLocaleString()}
+                           </div>
+                           <div className="flex items-center text-slate-400">
+                             <Clock className="w-3 h-3 mr-1" />
+                             {streamer.duration.split(":")[0]}h {streamer.duration.split(":")[1]}m
+                           </div>
+                        </div>
+                      ) : (
+                        <div className="mt-4 w-full text-xs text-slate-500 border-t border-slate-800 pt-3 flex justify-center items-center">
+                           <RadioTower className="w-3 h-3 mr-1" /> Offline
+                        </div>
+                      )}
+
+                      {streamer.isLive && (
+                        <div className="absolute -left-2 top-8 bg-slate-950 p-1 rounded-r border border-l-0 border-slate-800">
+                           <Pin className="w-3 h-3 text-orange-500" />
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </DrawerTrigger>
+                
+                <DrawerContent className="bg-slate-950 border-slate-800 text-slate-200">
+                  <div className="mx-auto w-full max-w-4xl p-6">
+                    <DrawerHeader className="px-0 pt-0 pb-4 border-b border-slate-800 flex flex-col md:flex-row md:items-start md:justify-between">
+                      <div className="flex items-center gap-4">
+                        <Avatar className="w-16 h-16 border border-slate-700">
+                          <AvatarImage src={selectedStreamer?.avatar} />
+                        </Avatar>
+                        <div className="text-left">
+                          <DrawerTitle className="text-2xl text-white">{selectedStreamer?.name}</DrawerTitle>
+                          <DrawerDescription className="flex items-center gap-2 mt-1">
+                            {selectedStreamer?.isLive ? (
+                              <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20">
+                                🔴 LIVE NOW
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="bg-slate-800 text-slate-400 border-slate-700">
+                                ⚫ OFFLINE
+                              </Badge>
+                            )}
+                            <span>Master ID: {selectedStreamer?.id}92837482</span>
+                          </DrawerDescription>
+                        </div>
+                      </div>
+                      <div className="mt-4 md:mt-0 flex gap-3">
+                        {selectedStreamer?.isLive ? (
+                          <Button variant="destructive" className="bg-red-600 hover:bg-red-700 shadow-lg shadow-red-500/20">
+                            <Square className="w-4 h-4 mr-2" /> End Session
+                          </Button>
+                        ) : (
+                          <Button className="bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20">
+                            <Play className="w-4 h-4 mr-2" /> Start Live
+                          </Button>
+                        )}
+                      </div>
+                    </DrawerHeader>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                      {/* Pinned Items / Bag Section */}
+                      <div className="space-y-4">
+                        <h4 className="font-semibold text-lg flex items-center">
+                          <ShoppingBagIcon className="w-5 h-5 mr-2 text-orange-400" />
+                          Keranjang Streamer
+                        </h4>
+                        <Card className="bg-slate-900 border-slate-800">
+                          <CardContent className="p-0">
+                             {selectedStreamer?.isLive ? (
+                               <div className="divide-y divide-slate-800 max-h-[300px] overflow-y-auto">
+                                 {injectedProducts.length > 0 ? injectedProducts.map((item, index) => {
+                                   const isPinned = pinnedItemId === item.id;
+                                   return (
+                                   <div key={item.id} className={`p-3 flex items-center gap-3 transition-colors ${isPinned ? 'bg-orange-500/5' : 'hover:bg-slate-800/30'}`}>
+                                     <div className="w-12 h-12 bg-slate-800 rounded flex-shrink-0 relative overflow-hidden">
+                                       <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+                                       <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center font-bold text-white text-xs">P{index + 1}</div>
+                                     </div>
+                                     <div className="flex-1 min-w-0 pr-2">
+                                       <p className={`text-sm font-medium truncate ${isPinned ? 'text-orange-400' : 'text-slate-200'}`} title={item.product_name}>
+                                         {item.product_name}
+                                       </p>
+                                       <p className="text-xs text-emerald-400">Rp {item.price_discount?.toLocaleString('id-ID')}</p>
+                                     </div>
+                                     <div className="flex items-center gap-1">
+                                        <Button 
+                                          size="sm" 
+                                          variant="outline" 
+                                          onClick={() => handleManualPin(item.id)}
+                                          className={`text-xs h-7 px-2 border-slate-700 transition-colors ${isPinned ? 'border-orange-500 text-orange-400 bg-orange-500/10' : 'text-slate-400 hover:text-white'}`}
+                                        >
+                                          {isPinned ? 'Pinned' : 'Pin'}
+                                        </Button>
+                                        <Button 
+                                          size="icon" 
+                                          variant="ghost" 
+                                          className="h-7 w-7 text-slate-500 hover:text-red-400 hover:bg-slate-800 disabled:opacity-50"
+                                          onClick={(e) => handleRemoveFromCart(item.id, e)}
+                                          title="Hapus dari Keranjang Streamer"
+                                        >
+                                          <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                     </div>
+                                   </div>
+                                   );
+                                 }) : (
+                                   <div className="p-6 text-center text-sm text-slate-500">
+                                      Belum ada produk yang di-inject. Silakan inject dari menu Koleksi terlebih dahulu.
+                                   </div>
+                                 )}
                                </div>
-                               );
-                             }) : (
-                               <div className="p-6 text-center text-sm text-slate-500">
-                                  Belum ada produk yang di-inject. Silakan inject dari menu Koleksi terlebih dahulu.
+                             ) : (
+                               <div className="p-8 text-center text-slate-500 text-sm">
+                                 Streamer sedang offline. Keranjang tidak tersedia.
                                </div>
                              )}
-                           </div>
-                         ) : (
-                           <div className="p-8 text-center text-slate-500 text-sm">
-                             Streamer sedang offline. Keranjang tidak tersedia.
-                           </div>
-                         )}
-                      </CardContent>
-                    </Card>
+                          </CardContent>
+                        </Card>
+                      </div>
+
+                      {/* Auto Pin Manager */}
+                      <div className="space-y-4">
+                         <h4 className="font-semibold text-lg flex items-center">
+                          <Pin className="w-5 h-5 mr-2 text-blue-400" />
+                          Auto-Pin Manager
+                        </h4>
+                        <Card className="bg-slate-900 border-slate-800">
+                          <CardContent className="p-5 space-y-6">
+                             <div className="flex items-center justify-between">
+                                <div className="space-y-1">
+                                  <p className="font-medium text-slate-200">Aktifkan Auto-Pin</p>
+                                  <p className="text-xs text-slate-400">Sistem akan otomatis merotasi produk di keranjang (Simulation Speed: Fast)</p>
+                                </div>
+                                <Switch 
+                                  checked={isAutoPinEnabled} 
+                                  onCheckedChange={setIsAutoPinEnabled}
+                                  disabled={injectedProducts.length <= 1 || !selectedStreamer?.isLive}
+                                />
+                             </div>
+
+                             <div className="space-y-3">
+                                <p className="text-sm text-slate-300">Interval Rotasi (detik)</p>
+                                <div className="flex gap-2">
+                                  {[60, 180, 300, 600].map((sec) => (
+                                    <Button 
+                                      key={sec} 
+                                      variant="outline" 
+                                      onClick={() => setPinInterval(sec)}
+                                      disabled={!isAutoPinEnabled}
+                                      className={`flex-1 border-slate-700 transition-colors ${pinInterval === sec && isAutoPinEnabled ? 'bg-slate-800 border-blue-500 text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.2)]' : ''}`}
+                                    >
+                                      {sec}s
+                                    </Button>
+                                  ))}
+                                </div>
+                             </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </div>
+
+                    <DrawerFooter className="px-0 pt-6">
+                      <DrawerClose asChild>
+                        <Button variant="outline" className="border-slate-800 hover:bg-slate-800 text-slate-300">Tutup Panel</Button>
+                      </DrawerClose>
+                    </DrawerFooter>
                   </div>
-
-                  {/* Auto Pin Manager */}
-                  <div className="space-y-4">
-                     <h4 className="font-semibold text-lg flex items-center">
-                      <Pin className="w-5 h-5 mr-2 text-blue-400" />
-                      Auto-Pin Manager
-                    </h4>
-                    <Card className="bg-slate-900 border-slate-800">
-                      <CardContent className="p-5 space-y-6">
-                         <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                              <p className="font-medium text-slate-200">Aktifkan Auto-Pin</p>
-                              <p className="text-xs text-slate-400">Sistem akan otomatis merotasi produk di keranjang (Simulation Speed: Fast)</p>
-                            </div>
-                            <Switch 
-                              checked={isAutoPinEnabled} 
-                              onCheckedChange={setIsAutoPinEnabled}
-                              disabled={injectedProducts.length <= 1 || !selectedStreamer?.isLive}
-                            />
-                         </div>
-
-                         <div className="space-y-3">
-                            <p className="text-sm text-slate-300">Interval Rotasi (detik)</p>
-                            <div className="flex gap-2">
-                              {[60, 180, 300, 600].map((sec) => (
-                                <Button 
-                                  key={sec} 
-                                  variant="outline" 
-                                  onClick={() => setPinInterval(sec)}
-                                  disabled={!isAutoPinEnabled}
-                                  className={`flex-1 border-slate-700 transition-colors ${pinInterval === sec && isAutoPinEnabled ? 'bg-slate-800 border-blue-500 text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.2)]' : ''}`}
-                                >
-                                  {sec}s
-                                </Button>
-                              ))}
-                            </div>
-                         </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-
-                <DrawerFooter className="px-0 pt-6">
-                  <DrawerClose asChild>
-                    <Button variant="outline" className="border-slate-800 hover:bg-slate-800 text-slate-300">Tutup Panel</Button>
-                  </DrawerClose>
-                </DrawerFooter>
-              </div>
-            </DrawerContent>
-          </Drawer>
-        ))}
-      </div>
+                </DrawerContent>
+              </Drawer>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

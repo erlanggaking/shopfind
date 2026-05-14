@@ -7,18 +7,38 @@ export type Streamer = {
   ccu: number;
   duration: string;
   avatar: string;
+  studio: string;
 };
 
-const INITIAL_STREAMERS: Streamer[] = [
-  { id: 1, name: "Jessica Official Shop", isLive: true, ccu: 1250, duration: "02:15:30", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jessica" },
-  { id: 2, name: "Fashion House BDO", isLive: true, ccu: 342, duration: "01:05:10", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Bella" },
-  { id: 3, name: "Gadget Tech Store", isLive: true, ccu: 4890, duration: "04:30:00", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Tech" },
-  { id: 4, name: "Beauty Care ID", isLive: false, ccu: 0, duration: "00:00:00", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Beauty" },
-  { id: 5, name: "Sneakers Zone", isLive: false, ccu: 0, duration: "00:00:00", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Shoes" },
-  { id: 6, name: "Mom & Baby Shop", isLive: true, ccu: 89, duration: "00:15:20", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mom" },
-  { id: 7, name: "OOTD Men Outfit", isLive: false, ccu: 0, duration: "00:00:00", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Men" },
-  { id: 8, name: "Promo Elektronik", isLive: true, ccu: 2100, duration: "03:45:12", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Promo" },
-].sort((a, b) => Number(b.isLive) - Number(a.isLive));
+const generateDummyStreamers = () => {
+  const studios = ["Studio Alpha (Fashion)", "Studio Beta (Tech)", "Studio Gamma (Beauty)", "Studio Delta (F&B)", "Studio Epsilon (Lifestyle)"];
+  const names = ["Jessica", "Bella", "Tech", "Beauty", "Shoes", "Mom", "Men", "Promo", "Gadget", "Home", "Kitchen", "Sports", "Kids", "Toys", "Pets"];
+  
+  const streamers: Streamer[] = [];
+  let id = 1;
+
+  studios.forEach(studio => {
+    // Generate 50 streamers per studio
+    for (let i = 0; i < 50; i++) {
+      const isLive = Math.random() > 0.3; // 70% chance to be live
+      const seedName = names[Math.floor(Math.random() * names.length)];
+      
+      streamers.push({
+        id: id++,
+        name: `${seedName} Host ${i+1}`,
+        isLive,
+        ccu: isLive ? Math.floor(Math.random() * 5000) : 0,
+        duration: isLive ? `0${Math.floor(Math.random() * 5)}:${Math.floor(Math.random() * 50) + 10}:00` : "00:00:00",
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${studio.replace(/\s+/g, '')}${id}`,
+        studio: studio
+      });
+    }
+  });
+
+  return streamers.sort((a, b) => Number(b.isLive) - Number(a.isLive));
+};
+
+const INITIAL_STREAMERS: Streamer[] = generateDummyStreamers();
 
 type StreamerStore = {
   streamers: Streamer[];
