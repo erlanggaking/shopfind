@@ -21,6 +21,7 @@ const DUMMY_PRODUCTS = [
     reviews: 1250,
     createdAt: "2023-11-15",
     trend: "Hot",
+    trendPercentage: 133,
     sales30Days: 3500,
     totalSales: 45000,
     totalRevenue: 2925000000,
@@ -40,6 +41,7 @@ const DUMMY_PRODUCTS = [
     reviews: 840,
     createdAt: "2024-02-10",
     trend: "Trending",
+    trendPercentage: 45,
     sales30Days: 1200,
     totalSales: 8900,
     totalRevenue: 1290500000,
@@ -59,6 +61,7 @@ const DUMMY_PRODUCTS = [
     reviews: 320,
     createdAt: "2024-04-05",
     trend: "New",
+    trendPercentage: 12,
     sales30Days: 890,
     totalSales: 1200,
     totalRevenue: 106800000,
@@ -211,7 +214,12 @@ export default function ProductResearch() {
                  {/* Sales 30 Days */}
                  <div className="space-y-1">
                    <p className="text-xs text-slate-500 font-medium">Penjualan 30 Hari</p>
-                   <p className="font-bold text-slate-200">{product.sales30Days.toLocaleString('id-ID')} <span className="text-xs text-slate-400 font-normal">terjual</span></p>
+                   <div className="flex flex-col xl:flex-row xl:items-center gap-1 xl:gap-2">
+                     <p className="font-bold text-slate-200">{product.sales30Days.toLocaleString('id-ID')} <span className="text-xs text-slate-400 font-normal">terjual</span></p>
+                     <Badge variant="outline" className={`w-fit text-[10px] px-1.5 py-0 border-none ${product.trendPercentage > 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                       {product.trendPercentage > 0 ? '↑' : '↓'} {Math.abs(product.trendPercentage)}% Tren
+                     </Badge>
+                   </div>
                  </div>
 
                  {/* Total Sales */}
